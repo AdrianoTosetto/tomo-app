@@ -1,7 +1,9 @@
 import express from 'express'
 import bodyParser from 'body-parser'
 
-class App {
+import { Controller } from 'controllers/user/controller'
+
+export class App {
   public app: express.Application
   public port: number
 
@@ -9,24 +11,21 @@ class App {
   constructor(controllers, port) {
     this.app = express()
     this.port = port
-  
+    this.initializeMiddlewares()
+    this.initializeControllers(controllers)
   }
 
   private initializeMiddlewares() {
     this.app.use(bodyParser.json())
   }
 
-  private initializeControllers(controllers) {
+  private initializeControllers(controllers: Controller[]) {
     controllers.forEach(controller => {
       this.app.use('/', controller.router)
     })
   }
 
-  public listen() {
-    this.app.listen(this.port, () => {
-      console.log(`App listening on the port ${this.port}`)
-    })
+  public listen(callback: Function) {
+    this.app.listen(this.port, callback())
   }
 }
-
-export default App
