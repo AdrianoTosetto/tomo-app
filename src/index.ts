@@ -1,24 +1,15 @@
-import express from 'express';
-import { Request, Response }  from 'express';
-
-import { requestLogger } from './middlewares/requests';
-
-import test from './db/index'
+import { App } from './app'
+import { UserController } from './controllers/user/user.controller';
 
 require('dotenv').config()
 
 const PORT = process.env.BACKEND_PORT
 
-const app = express();
- 
-app.use(requestLogger)
 
-app.get('/', (request: Request, response: Response) => {
-  test()
-  response.send('Hello world!');
-});
+const userController = new UserController()
 
- 
-app.listen(PORT, () => {
-  console.log(`Server listening at ${PORT}...`)
-});
+const app = new App([userController], PORT)
+
+app.listen(() => {
+  console.log(`App listening on the port ${PORT}`)
+})
