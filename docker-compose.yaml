@@ -10,7 +10,7 @@ services:
     environment:
       - BACKEND_PORT=${BACKEND_PORT}
     volumes:
-      - /home/aot/my_projects/tomo-app/src:/home/node/app/src
+      - ${PROJECT_PATH}/src:/home/node/app/src
     container_name: ts-node-docker
     expose:
       - '3000'
