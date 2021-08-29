@@ -2,6 +2,7 @@ version: '3'
 
 services:
   backend:
+    working_dir: /home/node/app
     build:
       context: .
       dockerfile: docker/backend/Dockerfile
@@ -9,9 +10,7 @@ services:
     environment:
       - BACKEND_PORT=${BACKEND_PORT}
     volumes:
-      - ./node_modules:/home/node/app/node_modules
-      - ./src:/home/node/app/src
-      - ./nodemon.json:/home/node/app/nodemon.json
+      - /home/aot/my_projects/tomo-app/src:/home/node/app/src
     container_name: ts-node-docker
     expose:
       - '3000'
