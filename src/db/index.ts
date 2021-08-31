@@ -4,65 +4,46 @@ import { Interest } from '../models/interests/interest'
 import { InterestRepository } from '../models/interests/repository'
 import { InterestController } from '../controllers/interests/interests.controller'
 
-// export default (async () => {
+export default (async () => {
 
-//   const connection = await createConnection({
-//     type: "postgres",
-//     host: "tomo-app_postgres_1",
-//     port: 5432,
-//     username: "postgres",
-//     password: "postgres",
-//     database: "tomodb",
-//     entities: [Interest],
-//   });
+  const connection = await createConnection({
+    type: "postgres",
+    host: "tomo-app_postgres_1",
+    port: 5432,
+    username: "postgres",
+    password: "postgres",
+    database: "tomodb",
+    entities: [Interest],
+  });
 
-//   // const interestRepository = connection.getCustomRepository(InterestRepository);
-//   // const newInterest = new Interest();
-//   // newInterest.name = 'Caminhada'
+  const interestRepository = connection.getCustomRepository(InterestRepository);
+  const newInterest = new Interest();
+  newInterest.name = 'Caminhada'
 
-//   // await interestRepository.save(newInterest);
+  await interestRepository.save(newInterest);
 
-//   // await connection.close();
+  await connection.close();
 
-// })
+})
 
-export class dbConnector {
-  connection: Connection;
+export class DataBaseConnector {
+  private static connection: Connection;
+  private constructor() { }
 
-  constructor() {
-    this.initiateConnection();
-  }
+  public static async getConnection(): Promise<Connection> {
+    if (!DataBaseConnector.connection) {
+      console.log('falling here')
+      DataBaseConnector.connection = await createConnection({
+        type: "postgres",
+        host: "tomo-app_postgres_1",
+        port: 5432,
+        username: "postgres",
+        password: "postgres",
+        database: "tomodb",
+        entities: [Interest],
+      })
 
-  async initiateConnection() {
-    const connectionManager = getConnectionManager();
-    this.connection = connectionManager.create({
-      type: "postgres",
-      host: "tomo-app_postgres_1",
-      port: 5432,
-      username: "postgres",
-      password: "postgres",
-      database: "tomodb",
-      entities: [Interest],
-    });
-  }
-
-  async saveInterest(newInterest: Interest) {
-    await this.connection.connect();
-
-    const interestRepository = this.connection.getCustomRepository(InterestRepository);
-
-    await interestRepository.save(newInterest);
-
-    await this.connection.close();
-  }
-
-  async getInterestByName(name: string) {
-    const interestRepository = this.connection.getCustomRepository(InterestRepository);
-
-    const existingInterest = interestRepository.findByName(name);
-
-    // await this.connection.close();
-
-    return existingInterest;
+      return DataBaseConnector.connection
+    }
   }
 }
