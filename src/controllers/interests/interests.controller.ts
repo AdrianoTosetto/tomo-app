@@ -66,14 +66,42 @@ export class InterestController implements Controller {
 
 
     constructor() {
-        this.router.get(this.path, async (req: express.Request, res: express.Response) => {
-            const name = String(req.query['name']);
-            console.log(name);
-            const interest = await (await DataBaseConnector.getConnection()).getCustomRepository(InterestRepository)
-                .findByName(name).getOne();
-            // .createQueryBuilder("interests").getOne()
-            console.log(interest);
-            res.send(`Hello from route ${this.path}, ${interest}`)
+        this.router.get('/interests', async (req: express.Request, res: express.Response) => {
+            const interests = await (await DataBaseConnector.getConnection()).getCustomRepository(InterestRepository).find({ select: ["id", "name"] });
+
+            console.log(interests);
+
+            res.send(`Get from route /interests, ${interests}\n`)
+
+        })
+        this.router.get('/interests/:id', async (req: express.Request, res: express.Response) => {
+            const id = String(req.params.id);
+            const interest = await (await DataBaseConnector.getConnection()).getCustomRepository(InterestRepository).findOne(id);
+            res.send(`Get from route /interests/${id}, ${interest.name}\n`)
+
+        })
+        this.router.post('/interests', async (req: express.Request, res: express.Response) => {
+            let interest = new Interest();
+            const name = String(req.body.name);
+            const repo = await (await DataBaseConnector.getConnection()).getCustomRepository(InterestRepository)
+            if (await repo.findByName(name).getOne() == undefined) {
+                interest.name = name;
+                repo.insert(interest);
+            }
+            res.send(`Post from route /interests, id: ${interest.id}, name: ${interest.name}\n`)
+
+        })
+        this.router.delete('/interests/:id', async (req: express.Request, res: express.Response) => {
+            const id = String(req.params.id);
+            await (await DataBaseConnector.getConnection()).getCustomRepository(InterestRepository).delete(id);
+            res.send(`Delete from route /interests, ${id}\n`)
+
+        })
+        this.router.put('/interests/:id', async (req: express.Request, res: express.Response) => {
+            const id = String(req.params.id);
+            const interest = req.body;
+            await (await DataBaseConnector.getConnection()).getCustomRepository(InterestRepository).update(id, interest);;
+            res.send(`Update from route /interests, id: ${id}, new name: ${interest.name}\n`)
 
         })
     }
