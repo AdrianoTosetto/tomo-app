@@ -68,17 +68,13 @@ export class InterestController implements Controller {
     constructor() {
         this.router.get('/interests', async (req: express.Request, res: express.Response) => {
             const interests = await (await DataBaseConnector.getConnection()).getCustomRepository(InterestRepository).find({ select: ["id", "name"] });
-
-            console.log(interests);
-
             res.send(`Get from route /interests, ${interests}\n`)
-
+            // console.log(interests);
         })
         this.router.get('/interests/:id', async (req: express.Request, res: express.Response) => {
             const id = String(req.params.id);
             const interest = await (await DataBaseConnector.getConnection()).getCustomRepository(InterestRepository).findOne(id);
             res.send(`Get from route /interests/${id}, ${interest.name}\n`)
-
         })
         this.router.post('/interests', async (req: express.Request, res: express.Response) => {
             let interest = new Interest();
@@ -89,20 +85,17 @@ export class InterestController implements Controller {
                 repo.insert(interest);
             }
             res.send(`Post from route /interests, id: ${interest.id}, name: ${interest.name}\n`)
-
         })
         this.router.delete('/interests/:id', async (req: express.Request, res: express.Response) => {
             const id = String(req.params.id);
             await (await DataBaseConnector.getConnection()).getCustomRepository(InterestRepository).delete(id);
             res.send(`Delete from route /interests, ${id}\n`)
-
         })
         this.router.put('/interests/:id', async (req: express.Request, res: express.Response) => {
             const id = String(req.params.id);
             const interest = req.body;
             await (await DataBaseConnector.getConnection()).getCustomRepository(InterestRepository).update(id, interest);;
             res.send(`Update from route /interests, id: ${id}, new name: ${interest.name}\n`)
-
         })
     }
 }
