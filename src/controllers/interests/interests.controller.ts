@@ -6,80 +6,26 @@ import { Interest } from '../../models/interests/interest';
 import { InterestRepository } from '../../models/interests/repository';
 import { DataBaseConnector } from '../../db/index';
 
-// export class InterestController implements Controller {
-//     path: string = '/interests';
-//     router: express.Router = express.Router();
-
-//     // @Get("/interests")
-//     // getAll() {
-//     //     return getManager().find(Interest);
-//     // }
-
-//     // @Get("/interests/:id")
-//     // getAll(@Param("id") userId: number) {
-//     //     return getRepository(Interest).findOne(userId);
-//     // }
-
-
-//     constructor() {
-//         // this.insertMockData();
-//         this.router.post(this.path, (req: express.Request, res: express.Response) => {
-
-//             // const newInterest = new Interest();
-//             // newInterest.name = 'Caminhada'
-//             // this.connector.saveInterest(newInterest);
-
-//             res.send(`Hello from route ${this.path}`)
-//         })
-//         this.router.get(this.path, async (req: express.Request, res: express.Response) => {
-
-//             // const newInterest = new Interest();
-//             // newInterest.name = 'Caminhada'
-//             // this.connector.saveInterest(newInterest);
-
-//             // const existingInterest = interestRepository.findByName(name);
-
-//             // const interesses = await (await this.connector.getInterestByName('Caminhada')).getCount();
-
-//             // res.send(`${interesses}`)
-
-//             // res.send(`Hello from route ${this.path}, ${interesses}`)
-
-//             // res.send(`kkk ${this.connector.getInterestByName('Caminhada')}`)
-//         })
-//     }
-
-//     async insertMockData() {
-//         const newInterest = new Interest();
-//         newInterest.name = 'Caminhada';
-//         const connection = await DataBaseConnector.getConnection();
-//         await connection.connect();
-//         const interestRepository = connection.getCustomRepository(InterestRepository);
-//         await interestRepository.save(newInterest);
-//         await connection.close();
-//     }
-// }
-
 export class InterestController implements Controller {
     path: string = '/interests';
     router: express.Router = express.Router();
 
 
     constructor() {
-        this.router.get('/interests', async (req: express.Request, res: express.Response) => {
+        this.router.get(this.path, async (req: express.Request, res: express.Response) => {
             const interests = (await (await DataBaseConnector.getConnection()).getCustomRepository(InterestRepository).find({ select: ["id", "name"] }));
-            res.send(`Get from route /interests, ${JSON.stringify(interests)}\n`);
+            res.send(`Get from route ${this.path}, ${JSON.stringify(interests)}\n`);
         })
-        this.router.get('/interests/:id', async (req: express.Request, res: express.Response) => {
+        this.router.get(this.path + '/:id', async (req: express.Request, res: express.Response) => {
             const id = String(req.params.id);
             const interest = await (await DataBaseConnector.getConnection()).getCustomRepository(InterestRepository).findOne(id);
             if (interest != undefined) {
-                res.send(`Get from route /interests/${id}, ${interest.name}\n`)
+                res.send(`Get from route ${this.path}/${id}, ${interest.name}\n`)
             } else {
                 res.status(404).send({ error: 'Interest not found' });
             }
         })
-        this.router.post('/interests', async (req: express.Request, res: express.Response) => {
+        this.router.post(this.path, async (req: express.Request, res: express.Response) => {
             const name = String(req.body.name);
             const repo = (await DataBaseConnector.getConnection()).getCustomRepository(InterestRepository);
             if (await repo.findByName(name).getOne() == undefined) {
@@ -87,23 +33,23 @@ export class InterestController implements Controller {
                 interest.name = name;
                 repo.insert(interest);
                 interest = await repo.findByName(name).getOne();
-                res.send(`Post from route /interests, id: ${interest.id}, name: ${interest.name}\n`)
+                res.send(`Post from route ${this.path}, id: ${interest.id}, name: ${interest.name}\n`)
             } else {
                 res.status(412).send({ error: 'Interest already exists' });
             }
         })
-        this.router.delete('/interests/:id', async (req: express.Request, res: express.Response) => {
+        this.router.delete(this.path + '/:id', async (req: express.Request, res: express.Response) => {
             const id = String(req.params.id);
             await (await DataBaseConnector.getConnection()).getCustomRepository(InterestRepository).delete(id);
-            res.send(`Delete from route /interests, ${id}\n`)
+            res.send(`Delete from route ${this.path}, ${id}\n`)
         })
-        this.router.put('/interests/:id', async (req: express.Request, res: express.Response) => {
+        this.router.put(this.path + '/:id', async (req: express.Request, res: express.Response) => {
             const id = String(req.params.id);
             const repo = (await DataBaseConnector.getConnection()).getCustomRepository(InterestRepository);
             if ((await repo.findByIds([id])).length > 0) {
                 const interest = req.body;
                 await repo.update(id, interest);
-                res.send(`Update from route /interests, id: ${id}, new name: ${interest.name}\n`)
+                res.send(`Update from route ${this.path}, id: ${id}, new name: ${interest.name}\n`)
             } else {
                 res.status(404).send({ error: 'Interest not found' });
             }
